@@ -2,9 +2,9 @@
 // =============================================================================
 
 // call the packages we need
-var express    = require('express');        // call express
-var app        = express();                 // define our app using express
-var bodyParser = require('body-parser');
+let express    = require('express');        // call express
+let app        = express();                 // define our app using express
+let bodyParser = require('body-parser');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -128,3 +128,6 @@ app.use('/api', router);
 // =============================================================================
 app.listen(port);
 console.log('Magic happens on port ' + port);
+
+// for testing purposes
+module.exports = app;
