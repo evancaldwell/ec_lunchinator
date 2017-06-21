@@ -23,13 +23,11 @@ describe('Lunchinator', () => {
             ]
         }
         chai.request(server)
-            .post('/create-ballot')
+            .post('/api/create-ballot')
             .send(ballot)
             .end((err, res) => {
                 res.should.have.status(418);
-                res.body.should.have.property('errors');
-                res.body.errors.should.have.property('endTime');
-                res.body.errors.pages.should.have.property('kind').eql('required');
+                res.body.should.have.property('error').eql('An end time is required');
               done();
             });
       });
@@ -42,13 +40,11 @@ describe('Lunchinator', () => {
             endTime: "1/21/2017 11:00"
         }
         chai.request(server)
-            .post('/create-ballot')
+            .post('/api/create-ballot')
             .send(ballot)
             .end((err, res) => {
                 res.should.have.status(418);
-                res.body.should.have.property('errors');
-                res.body.errors.should.have.property('endTime');
-                res.body.errors.pages.should.have.property('kind').eql('expired');
+                res.body.should.have.property('error').eql('The end time is already expired');
               done();
             });
       });
@@ -57,13 +53,11 @@ describe('Lunchinator', () => {
             endTime: "12/21/2017 11:00"
         }
         chai.request(server)
-            .post('/create-ballot')
+            .post('/api/create-ballot')
             .send(ballot)
             .end((err, res) => {
                 res.should.have.status(418);
-                res.body.should.have.property('errors');
-                res.body.errors.should.have.property('voters');
-                res.body.errors.pages.should.have.property('kind').eql('required');
+                res.body.should.have.property('error').eql('There must be at least one voter');
               done();
             });
       });
@@ -76,7 +70,8 @@ describe('Lunchinator', () => {
             endTime: "12/21/2017 11:00"
         }
         chai.request(server)
-            .post('/create-ballot')
+            .post('/api/create-ballot')
+            .set('content-type', 'application/x-www-form-urlencoded')
             .send(ballot)
             .end((err, res) => {
                 res.should.have.status(200);
@@ -89,10 +84,10 @@ describe('Lunchinator', () => {
   });
 
   // test the ballot /GET route
-  describe('/GET ballot', () => {
+  describe('/GET ballot/:ballotId', () => {
       it('it should GET a ballot with the specified ID', (done) => {
         chai.request(server)
-            .get('/api/ballot')
+            .get('/api/ballot/:ballotId')
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a('object');
@@ -112,7 +107,7 @@ describe('Lunchinator', () => {
             ]
         }
         chai.request(server)
-            .post('/create-ballot')
+            .post('/api/create-ballot')
             .send(ballot)
             .end((err, res) => {
                 res.should.have.status(200);

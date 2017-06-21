@@ -78,23 +78,43 @@ router.route('/create-ballot')
     // create a ballot that includes voting closing time and a list of voters with email and name
     // response will incluse GUID as ballotId to be used in voting process
     .post(function(req, res) {
+        var now = new Date();
         var endTime = req.body.endTime;
-        var voters = JSON.parse(req.body.voters);
-        console.log('endtime: ', endTime);
-        console.log('voters: ', voters);
+        // var voters = req.body.voters;
+        // voters ? voters = JSON.parse(voters) : voters = null;
+        var voters;
+        if (req.body.voters) {
+            voters = req.body.voters;
+        } else {
+            voters = null;
+        }
 
-        var ref = db.ref("ballots");
-        var ballotKey = ref.push({endTime: endTime, voters: voters}).key;
+        if (!endTime) {
+            console.log('hit first block');
+            res.status(418).json({error: 'An end time is required'});
+        } else if (new Date(endTime) <= now) {
+            console.log('hit second block');
+            res.status(418).json({error: 'The end time is already expired'});
+        } else if (!voters || Object.keys(voters).length > 0) {
+            console.log('hit third block');
+            res.status(418).json({error: 'There must be at least one voter'});
+        } else {
+            console.log('hit final block');
+            var ref = db.ref("ballots");
+            var ballotKey = ref.push({endTime: endTime, voters: voters}).key;
+            res.json({"ballotId": ballotKey});
+        }
 
-        res.json({"ballotId": ballotKey});
     });
 
-router.route('/ballot')
+router.route('/ballot/:ballotId')
 
     // create a ballot that includes voting closing time and a list of voters with email and name
     // response will incluse GUID as ballotId to be used in voting process
     .get(function(req, res) {
-        var ref = db.ref("ballots");
+        var ballotId = req.params.ballotId;
+        console.log('get ballotId: ', ballotId);
+        var ref = db.ref("ballots/" + ballotId);
         ref.once("value", function(snapshot) {
           res.json(snapshot.val());
         });
