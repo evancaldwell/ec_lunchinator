@@ -90,16 +90,12 @@ router.route('/create-ballot')
         }
 
         if (!endTime) {
-            console.log('hit first block');
             res.status(418).json({error: 'An end time is required'});
         } else if (new Date(endTime) <= now) {
-            console.log('hit second block');
             res.status(418).json({error: 'The end time is already expired'});
-        } else if (!voters || Object.keys(voters).length > 0) {
-            console.log('hit third block');
+        } else if (!voters || Object.keys(voters).length < 1) {
             res.status(418).json({error: 'There must be at least one voter'});
         } else {
-            console.log('hit final block');
             var ref = db.ref("ballots");
             var ballotKey = ref.push({endTime: endTime, voters: voters}).key;
             res.json({"ballotId": ballotKey});

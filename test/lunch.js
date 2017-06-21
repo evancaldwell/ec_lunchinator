@@ -31,7 +31,7 @@ describe('Lunchinator', () => {
               done();
             });
       });
-      it('it should not POST a ballot expired voting end time', (done) => {
+      it('it should not POST a ballot with expired voting end time', (done) => {
         let ballot = {
             voters: [
               { "name":"Bob", "email":"bob@lunch.co" },
@@ -64,8 +64,8 @@ describe('Lunchinator', () => {
       it('it should POST a ballot and return a ballotId', (done) => {
         let ballot = {
             voters: [
-              { "name":"Bob", "email":"bob@lunch.co" },
-              { "name":"Jim", "email":"jim@lunch.co" }
+              { name:"Bob", email:"bob@lunch.co" },
+              { name:"Jim", email:"jim@lunch.co" }
             ],
             endTime: "12/21/2017 11:00"
         }
