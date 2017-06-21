@@ -87,11 +87,15 @@ describe('Lunchinator', () => {
   describe('/GET ballot/:ballotId', () => {
       it('it should GET a ballot with the specified ID', (done) => {
         chai.request(server)
-            .get('/api/ballot/:ballotId')
+            .get('/api/ballot/' + 'exampleBallot')
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a('object');
-                res.body.should.not.be.empty;
+                res.body.should.have.property('endTime');
+                res.body.should.have.property('voters').should.not.be.empty;
+                res.body.voters.should.have.lengthOf(2);
+                res.body.voters[0].should.have.property('email').eql('bob@lunch.co');
+                res.body.voters[0].should.have.property('name').eql('Bob');
               done();
             });
       });
