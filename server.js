@@ -4,7 +4,8 @@
 // call the packages we need
 let express    = require('express');        // call express
 let app        = express();                 // define our app using express
-let bodyParser = require('body-parser');
+let bodyParser = require('body-parser');    // for getting post data
+var http       = require('http');           // for calling the restaurant api
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -28,6 +29,9 @@ ref.once("value", function(snapshot) {
   console.log(snapshot.val());
 });
 
+// base url for the restaurant api
+var baseRestUrl = 'http://interview-project-17987.herokuapp.com/api/';
+
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();              // get an instance of the express Router
@@ -44,34 +48,7 @@ router.get('/', function(req, res) {
     res.json({ message: 'Time for lunch baby!' });
 });
 
-// more routes for our API will happen here
-// // on routes that end in /years
-// ----------------------------------------------------
-router.route('/years')
-
-    // create a year (accessed at POST http://localhost:8080/api/years)
-    .post(function(req, res) {
-
-        // ...
-
-    })
-
-    // get all the years (accessed at GET http://localhost:8080/api/years)
-    .get(function(req, res) {
-        // Bear.find(function(err, years) {
-        //     if (err)
-        //         res.send(err);
-        //
-        //     res.json(years);
-        // });
-        var ref = db.ref("ipedsData/2002/189264");
-        ref.once("value", function(snapshot) {
-          console.log(snapshot.val().CHFNM);
-          res.json(snapshot.val());
-          console.log('################################################');
-          console.log(res);
-        });
-    });
+// more routes for the API will happen here
 
 router.route('/create-ballot')
 
@@ -96,8 +73,50 @@ router.route('/create-ballot')
         } else if (!voters || Object.keys(voters).length < 1) {
             res.status(418).json({error: 'There must be at least one voter'});
         } else {
+            // create a reference to Firebase, save the basic ballot info and grab the key
             var ref = db.ref("ballots");
             var ballotKey = ref.push({endTime: endTime, voters: voters}).key;
+
+            http.get(baseRestUrl + 'restaurants', function(res) {
+                var body = ''; // Will contain the final response
+                // Received data is a buffer.
+                // Adding it to our body
+                res.on('data', function(data){
+                    body += data;
+                });
+                // After the response is completed, parse it and log it to the console
+                res.on('end', function() {
+                    var parsed = JSON.parse(body);
+                    var result;
+                    var results = [];
+                    // loop through the restaurants and pick 5 at random
+                    while (results.length < 5) {
+                        result = parsed[Math.floor(Math.random()*parsed.length)];
+                        // make sure there are no duplicates
+                        if(!results.includes(result)) {
+                            // TODO: put this in a function getAvgReviewRating
+                            // look up the rating and add it to the data
+                            http.get(baseRestUrl + 'reviews/' + result.name, function(res) {
+                                var review = '';
+                                res.on('data', function(data) {
+                                    review += data;
+                                });
+                                res.on('end', function() {
+                                    var parsedReview = JSON.parse(review);
+                                    console.log(parsedReview);
+                                })
+                            })
+                            results.push(result);
+                            console.log(results);
+                        }
+                    }
+                });
+            })
+            // If any error has occured, log error to console
+            .on('error', function(e) {
+            console.log("Got error: " + e.message);
+            });
+
             res.json({"ballotId": ballotKey});
         }
 
