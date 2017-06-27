@@ -61,7 +61,7 @@ router.route('/create-ballot')
         // voters ? voters = JSON.parse(voters) : voters = null;
         var voters;
         if (req.body.voters) {
-            voters = req.body.voters;
+            voters = JSON.parse(req.body.voters);
         } else {
             voters = null;
         }
@@ -84,32 +84,23 @@ router.route('/create-ballot')
                 res.on('data', function(data){
                     body += data;
                 });
-                // After the response is completed, parse it and log it to the console
+                // After the response is completed, parse it to get an object
                 res.on('end', function() {
-                    var parsed = JSON.parse(body);
-                    var result;
-                    var results = [];
+                    var restaurants = JSON.parse(body); // list of all restaurants
+                    var sugRestaurants = [];            // list of randomly selected restaurants
+                    var currRestaurant;
                     // loop through the restaurants and pick 5 at random
-                    while (results.length < 5) {
-                        result = parsed[Math.floor(Math.random()*parsed.length)];
+                    while (sugRestaurants.length < 5) {
+                        console.log('in while: ', sugRestaurants);
+                        currRestaurant = restaurants[Math.floor(Math.random()*restaurants.length)];
                         // make sure there are no duplicates
-                        if(!results.includes(result)) {
-                            // TODO: put this in a function getAvgReviewRating
-                            // look up the rating and add it to the data
-                            http.get(baseRestUrl + 'reviews/' + result.name, function(res) {
-                                var review = '';
-                                res.on('data', function(data) {
-                                    review += data;
-                                });
-                                res.on('end', function() {
-                                    var parsedReview = JSON.parse(review);
-                                    console.log(parsedReview);
-                                })
-                            })
-                            results.push(result);
-                            console.log(results);
+                        if(!sugRestaurants.includes(currRestaurant)) {
+                            console.log('in if: ', currRestaurant);
+                            sugRestaurants.push(currRestaurant);
+                            console.log('suggestions: ',sugRestaurants);
                         }
                     }
+                    // loop through suggestions and add avg rating
                 });
             })
             // If any error has occured, log error to console
@@ -117,6 +108,7 @@ router.route('/create-ballot')
             console.log("Got error: " + e.message);
             });
 
+            // TODO: move this to line 79 and test
             res.json({"ballotId": ballotKey});
         }
 
