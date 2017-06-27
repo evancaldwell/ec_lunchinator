@@ -96,6 +96,21 @@ describe('Lunchinator', () => {
                 res.body.voters.should.have.lengthOf(2);
                 res.body.voters[0].should.have.property('email').eql('bob@lunch.co');
                 res.body.voters[0].should.have.property('name').eql('Bob');
+
+
+                res.body.should.have.property('suggestion').should.not.be.empty;
+                res.body.suggestion.should.have.property('id').should.not.be.empty;
+                res.body.suggestion.should.have.property('name').should.not.be.empty;
+                res.body.suggestion.should.have.property('averageReview').should.not.be.empty;
+                res.body.suggestion.should.have.property('topReviewer').should.not.be.empty;
+                res.body.suggestion.should.have.property('review').should.not.be.empty;
+                
+                res.body.should.have.property('choices').should.not.be.empty;
+                res.body.choices.should.have.lengthOf(5);
+                res.body.choices[0].should.have.property('id').should.not.be.empty;
+                res.body.choices[0].should.have.property('name').should.not.be.empty;
+                res.body.choices[0].should.have.property('averageReview').should.not.be.empty;
+                res.body.choices[0].should.have.property('description').should.not.be.empty;
               done();
             });
       });
