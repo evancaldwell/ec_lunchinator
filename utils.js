@@ -5,7 +5,7 @@ let utils = {
 
   getAvgReviews: function(list) {
     console.log('in getAvg stuff');
-
+    
     return new Promise((resolve, reject) => {
       console.log('in promise');
       // look up the rating and add it to the data
