@@ -5,7 +5,8 @@
 let express    = require('express');        // call express
 let app        = express();                 // define our app using express
 let bodyParser = require('body-parser');    // for getting post data
-var http       = require('http');           // for calling the restaurant api
+let http       = require('http');           // for calling the restaurant api
+let utils      = require('./utils');        // some utility functions
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -88,19 +89,17 @@ router.route('/create-ballot')
                 res.on('end', function() {
                     var restaurants = JSON.parse(body); // list of all restaurants
                     var sugRestaurants = [];            // list of randomly selected restaurants
-                    var currRestaurant;
+                    var currRestaurant, modSugRestaurants;
                     // loop through the restaurants and pick 5 at random
                     while (sugRestaurants.length < 5) {
-                        console.log('in while: ', sugRestaurants);
                         currRestaurant = restaurants[Math.floor(Math.random()*restaurants.length)];
                         // make sure there are no duplicates
                         if(!sugRestaurants.includes(currRestaurant)) {
-                            console.log('in if: ', currRestaurant);
                             sugRestaurants.push(currRestaurant);
-                            console.log('suggestions: ',sugRestaurants);
                         }
                     }
                     // loop through suggestions and add avg rating
+                    modSugRestaurants = utils.getAvgReviews(sugRestaurants);
                 });
             })
             // If any error has occured, log error to console

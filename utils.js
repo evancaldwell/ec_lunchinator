@@ -1,10 +1,11 @@
-var http = require('http');
-var baseRestUrl = 'http://interview-project-17987.herokuapp.com/api/';
+let http = require('http');
+let baseRestUrl = 'http://interview-project-17987.herokuapp.com/api/';
 
 let utils = {
 
-  getAvgReviewRating: function(item) {
+  getAvgReviews: function(list) {
     console.log('in getAvg stuff');
+
     return new Promise((resolve, reject) => {
       console.log('in promise');
       // look up the rating and add it to the data
