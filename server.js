@@ -122,7 +122,19 @@ router.route('/ballot/:ballotId')
         console.log('get ballotId: ', ballotId);
         var ref = db.ref("ballots/" + ballotId);
         ref.once("value", function(snapshot) {
-          res.json(snapshot.val());
+          console.log('snapshot: ', snapshot.val());
+          var ballot = snapshot.val();
+          if (ballot.endTime < new Date()) {
+            res.json({
+              'suggestion': ballot.suggestion,
+              'choices': ballot.choices
+            });
+          } else {
+            res.json({
+              'winner': ballot.winner,
+              'choices': ballot.choices
+            });
+          }
         });
     });
 
