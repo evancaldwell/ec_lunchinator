@@ -16,7 +16,7 @@ describe('Lunchinator', () => {
   // test the create-ballot /POST route
   describe('/POST create-ballot', () => {
       it('it should not POST a ballot without voting end time', (done) => {
-        let ballot = {
+        let vote = {
             voters: [
               { "name":"Bob", "email":"bob@lunch.co" },
               { "name":"Jim", "email":"jim@lunch.co" }
@@ -32,7 +32,7 @@ describe('Lunchinator', () => {
             });
       });
       it('it should not POST a ballot with expired voting end time', (done) => {
-        let ballot = {
+        let vote = {
             voters: [
               { "name":"Bob", "email":"bob@lunch.co" },
               { "name":"Jim", "email":"jim@lunch.co" }
@@ -49,7 +49,7 @@ describe('Lunchinator', () => {
             });
       });
       it('it should not POST a ballot without at least one voter', (done) => {
-        let ballot = {
+        let vote = {
             endTime: "12/21/2017 11:00"
         }
         chai.request(server)
@@ -62,7 +62,7 @@ describe('Lunchinator', () => {
             });
       });
       it('it should POST a ballot and return a ballotId', (done) => {
-        let ballot = {
+        let vote = {
             voters: [
               { name:"Bob", email:"bob@lunch.co" },
               { name:"Jim", email:"jim@lunch.co" }
@@ -151,11 +151,10 @@ describe('Lunchinator', () => {
   // test the vote /POST route
   describe('/POST vote', () => {
       it('it should not POST a vote without an email, name, ballot ID and restaurant ID', (done) => {
-        let ballot = {
-            voters: [
-              { "name":"Bob", "email":"bob@lunch.co" },
-              { "name":"Jim", "email":"jim@lunch.co" }
-            ]
+        let vote = {
+            'id': '15',
+            'ballotId': 'exampleBallot',
+            'email': 'evan@test.co'
         }
         chai.request(server)
             .post('/api/create-ballot')
@@ -170,11 +169,30 @@ describe('Lunchinator', () => {
             });
       });
       it('it should not POST a vote after the deadline for a ballot', (done) => {
-        let ballot = {
-            voters: [
-              { "name":"Bob", "email":"bob@lunch.co" },
-              { "name":"Jim", "email":"jim@lunch.co" }
-            ]
+        let vote = {
+            'id': '15',
+            'ballotId': 'exampleBallot',
+            'name': 'Evan',
+            'email': 'evan@test.co'
+        }
+        chai.request(server)
+            .post('/api/create-ballot')
+            .send(ballot)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('errors');
+                res.body.errors.should.have.property('pages');
+                res.body.errors.pages.should.have.property('kind').eql('required');
+              done();
+            });
+      });
+      it('it should POST a vote with email, name, ballot ID and restaurant ID', (done) => {
+        let vote = {
+            'id': '15',
+            'ballotId': 'exampleBallot',
+            'name': 'Evan',
+            'email': 'evan@test.co'
         }
         chai.request(server)
             .post('/api/create-ballot')
