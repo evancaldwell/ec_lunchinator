@@ -90,9 +90,11 @@ describe('Lunchinator', () => {
             .get('/api/ballot/' + 'exampleBallot')
             .end((err, res) => {
                 res.should.have.status(200);
+                res.should.have.property('endTime')
+                // res.endTime.should.be.below
 
                 res.body.should.have.property('suggestion').should.not.be.empty;
-                res.body.suggestion.to.contain.all.keys([
+                res.body.suggestion.should.contain.all.keys([
                     'id',
                     'name',
                     'averageReview',
@@ -107,7 +109,7 @@ describe('Lunchinator', () => {
                 
                 res.body.should.have.property('choices').should.not.be.empty;
                 res.body.choices.should.have.lengthOf(5);
-                res.body.choices[0].to.contain.all.keys([
+                res.body.choices[0].should.contain.all.keys([
                     'id',
                     'name',
                     'averageReview',
@@ -125,6 +127,8 @@ describe('Lunchinator', () => {
             .get('/api/ballot/' + 'exampleBallot')
             .end((err, res) => {
                 res.should.have.status(200);
+                res.should.have.property('endTime')
+                // res.endTime.should.be.below
 
                 res.body.should.have.property('suggestion').should.not.be.empty;
                 res.body.suggestion.should.have.property('id').should.not.be.empty;
@@ -146,7 +150,26 @@ describe('Lunchinator', () => {
 
   // test the vote /POST route
   describe('/POST vote', () => {
-      it('it should not POST a vote without an email', (done) => {
+      it('it should not POST a vote without an email, name, ballot ID and restaurant ID', (done) => {
+        let ballot = {
+            voters: [
+              { "name":"Bob", "email":"bob@lunch.co" },
+              { "name":"Jim", "email":"jim@lunch.co" }
+            ]
+        }
+        chai.request(server)
+            .post('/api/create-ballot')
+            .send(ballot)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                res.body.should.have.property('errors');
+                res.body.errors.should.have.property('pages');
+                res.body.errors.pages.should.have.property('kind').eql('required');
+              done();
+            });
+      });
+      it('it should not POST a vote after the deadline for a ballot', (done) => {
         let ballot = {
             voters: [
               { "name":"Bob", "email":"bob@lunch.co" },
